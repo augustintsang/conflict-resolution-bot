@@ -9,9 +9,7 @@ readme = "README.md"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "litellm (>=1.60.2,<2.0.0)",
-    "llama-index (>=0.12.17,<0.13.0)",
-    "crewai[tools] (>=0.102.0,<0.103.0)"
-]
+    "llama-index (>=0.12.17,<0.13.0)"]
 
 
 [build-system]
