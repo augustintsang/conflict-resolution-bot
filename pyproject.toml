@@ -6,10 +6,11 @@ authors = [
     {name = "Jamie",email = "jamiejmartin2@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<3.13"
 dependencies = [
-    "litellm (>=1.61.4,<2.0.0)",
-    "llama-index (>=0.12.17,<0.13.0)"
+    "litellm (>=1.60.2,<2.0.0)",
+    "llama-index (>=0.12.17,<0.13.0)",
+    "crewai[tools] (>=0.102.0,<0.103.0)"
 ]
 
 
