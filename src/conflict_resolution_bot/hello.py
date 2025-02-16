@@ -34,7 +34,8 @@ Analyze the following meeting transcript and extract the
 primary objective or collective goal discussed. Provide your response in the following JSON format:
 
 {
-  "objective": "<extracted objective>"
+  "objective": "<extracted objective>",
+  "key_points": "<extracted key points>"
 }
 """
 
