@@ -13,22 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Debug Fly.io Authentication
-        run: echo "FLY_API_KEY is set"
-        env:
-          FLY_API_KEY: ${{ secrets.FLY_API_KEY }}
-
-      - name: Install Fly.io CLI
-        run: curl -L https://fly.io/install.sh | sh
-
-      - name: Authenticate with Fly.io
+      - name: Deploy to Fly
         run: |
-          export FLYCTL_INSTALL="$HOME/.fly"
-          export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          echo "${{ secrets.FLY_API_KEY }}" | flyctl auth token
-
-      - name: Deploy to Fly.io
-        run: |
-          export FLYCTL_INSTALL="$HOME/.fly"
-          export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy --remote-only
+          cd conflict-resolution-bot/frontend
+          flyctl deploy --config=fly.toml --access-token=${{ secrets.FLY_API_KEY }}
