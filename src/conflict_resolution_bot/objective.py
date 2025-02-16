@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 import json
+import weave
 import re
 import uvicorn
 from litellm import completion
@@ -44,6 +45,11 @@ class BatchedKnowledgeOutput(BaseModel):
 # Create a single FastAPI app instance
 #
 app = FastAPI()
+
+#
+# Initialize Weave for tracking
+#
+weave.init("objective-tracking")
 
 def associate_citations_with_text(text: str, citations: List[str]):
     """
@@ -93,6 +99,7 @@ def associate_citations_with_text(text: str, citations: List[str]):
 # ENDPOINTS
 #
 
+@weave.op()
 @app.post("/generate_objective", response_model=List[ObjectiveOutput])
 def generate_objective(input_data: ObjectiveInput):
     """
@@ -151,7 +158,7 @@ def generate_objective(input_data: ObjectiveInput):
 
     return objectives
 
-
+@weave.op()
 @app.post("/knowledge", response_model=List[BatchedKnowledgeOutput])
 def get_knowledge(input_data: KnowledgeInput):
     """
