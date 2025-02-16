@@ -94,9 +94,9 @@ The output:
     raw_content = response.choices[0].message.content
 
     # Attempt to parse the content as JSON
-    try:
-        data = json.loads(raw_content)
-    except json.JSONDecodeError as e:
-        raise ValueError("Failed to parse model output as valid JSON array.") from e
+    #try:
+    #except json.JSONDecodeError as e:
+    #    data = json.loads(raw_content)
+    #    raise ValueError("Failed to parse model output as valid JSON array.") from e
 
-    return data
+    return raw_content
