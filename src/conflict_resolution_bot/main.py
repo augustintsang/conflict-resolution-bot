@@ -12,6 +12,8 @@ from app import app
 from objective import generate_objective_logic, ObjectiveInput
 from evaluate import evaluate_conversation_logic, EvaluateInput
 from knowledge import knowledge_logic, KnowledgeInput
+import psychology
+import ai_input  
 
 #
 # Combined Data Models
