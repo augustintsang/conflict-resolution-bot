@@ -63,7 +63,7 @@ def generate_objective_logic(input_data: ObjectiveInput) -> List[dict]:
         messages=messages,
         response_format={"type": "json_object"}
     )
-
+    print(os.environ.get("SAMBANOVA_API_KEY"))
     try:
         content = response["choices"][0]["message"]["content"]
         objectives = json.loads(content)
