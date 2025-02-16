@@ -1,0 +1,29 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Fly.io CLI
+        run: curl -L https://fly.io/install.sh | sh
+
+      - name: Authenticate with Fly.io
+        run: |
+          export FLYCTL_INSTALL="$HOME/.fly"
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          flyctl auth token ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy to Fly.io
+        run: |
+          export FLYCTL_INSTALL="$HOME/.fly"
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          flyctl deploy --remote-only
