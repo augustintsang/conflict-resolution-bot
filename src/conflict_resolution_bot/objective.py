@@ -1,36 +1,39 @@
+# objective.py
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 import os
-from google import genai
-import uvicorn
 import json
+import uvicorn
+from google import genai
 
-# 1) Define a Pydantic model matching your desired JSON schema for the output.
-class InfoItem(BaseModel):
-    Objective: str
-
-# 2) Define a Pydantic model for the input (the conversation).
-class ConversationInput(BaseModel):
+#
+# OBJECTIVE MODELS
+#
+class ObjectiveInput(BaseModel):
+    """Pydantic model for the request body containing the conversation."""
     conversation: str
 
-# Create the FastAPI app
+class ObjectiveOutput(BaseModel):
+    """Pydantic model for the output: a list of objectives."""
+    Objective: str
+
+# Create a single FastAPI 'app' instance
 app = FastAPI()
 
-@app.post("/generate_objective", response_model=List[InfoItem])
-def generate_objective(conversation_input: ConversationInput):
+@app.post("/generate_objective", response_model=List[ObjectiveOutput])
+def generate_objective(input_data: ObjectiveInput):
     """
-    This endpoint generates a JSON array of objects matching the schema:
-    [
-      {
-        "Objective": "some string"
-      },
-      ...
-    ]
+    This endpoint generates a JSON array matching the schema:
+      [
+        {
+          "Objective": "some string"
+        }
+      ]
     It takes a conversation string as input, then uses Gemini to parse out the conversation's objective(s).
     """
 
-    # The system prompt telling the model exactly what to do.
     system_prompt = """
     You are reviewing a conversation among multiple participants.
 
@@ -53,28 +56,33 @@ def generate_objective(conversation_input: ConversationInput):
     Return ONLY the JSON array, nothing else.
     """
 
-    # Pull conversation from the input.
-    conversation = conversation_input.conversation
+    conversation = input_data.conversation
 
-    # Initialize the genai client. 
-    # Make sure your environment has GEMINI_API_KEY set, or replace with a real key.
+    # Initialize the genai client
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     # Generate the content with forced JSON extraction & validation.
     response = client.models.generate_content(
         model="models/gemini-2.0-flash",
-        contents=conversation,         # The conversation or "user" message
+        contents=conversation,
         config={
             "response_mime_type": "application/json",
             "system_instruction": system_prompt,
-            "response_schema": list[InfoItem],
+            # IMPORTANT: Use the built-in `list` syntax:
+            "response_schema": list[ObjectiveOutput],
             "temperature": 0
         }
     )
 
-    # Return the raw JSON parsed into Python objects so FastAPI can enforce the schema.
+    # Convert the raw JSON string to a Python list/dict
     return json.loads(response.text)
 
-# Optional: If you want to run directly via `python my_file.py`
+#
+# IMPORTANT: Import `evaluate` here so that /evaluate_conversation is also attached
+# to the same 'app' instance. This must happen AFTER app = FastAPI() is defined.
+#
+import evaluate  # noqa: E402
+
+# If running this file directly: `python objective.py`
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("objective:app", host="0.0.0.0", port=8000, reload=False)
