@@ -5,6 +5,7 @@ from typing import List
 from pydantic import BaseModel
 from litellm import completion
 import weave
+import os
 
 from app import app  # Import the shared app (no circular import)
 # (Don't import evaluate.py or knowledge.py here to avoid circular import)
