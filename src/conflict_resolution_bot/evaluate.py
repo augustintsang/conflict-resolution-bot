@@ -31,7 +31,7 @@ For example, if they discussed “Crew AI,” a valid object might be:
   "Information_request": "Is Crew AI the best framework?"
 }
 
-Return ONLY the JSON array, nothing else.
+Return ONLY the JSON array, nothing else. Make sure all the context required is included in the information request so that information can be found standalone.
 """
 
 # 3) Example conversation that you'll pass in as "contents".
