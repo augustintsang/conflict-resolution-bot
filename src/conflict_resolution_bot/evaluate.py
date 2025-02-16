@@ -1,20 +1,13 @@
-from llama_index.llms.gemini import Gemini
-from llama_index.core.bridge.pydantic import WithJsonSchema
+from google import genai
+from pydantic import BaseModel, TypeAdapter
+import os
 
-# Define the JSON schema you want to enforce.
-json_schema = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "topic": {"type": "string"},
-            "Information_request": {"type": "string"}
-        },
-        "required": ["topic", "Information_request"]
-    }
-}
+# 1) Define a Pydantic model matching your desired JSON schema.
+class InfoItem(BaseModel):
+    topic: str
+    Information_request: str
 
-# Create the system prompt telling the model exactly what to do.
+# 2) Create the system prompt telling the model exactly what to do.
 system_prompt = """
 You are reviewing a conversation among multiple participants.
 
@@ -41,14 +34,7 @@ For example, if they discussed “Crew AI,” a valid object might be:
 Return ONLY the JSON array, nothing else.
 """
 
-# Instantiate the Gemini LLM, specifying the JSON schema wrapper.
-llm = Gemini(
-    system_prompt=system_prompt,
-    model="models/gemini-2.0-flash-thinking-exp",
-    messages_to_prompt=WithJsonSchema(json_schema=json_schema)
-)
-
-# Now call .complete with the conversation text as the user message:
+# 3) Example conversation that you'll pass in as "contents".
 conversation = """
 Jessica: Okay, so we all like the idea of an AI agent that orders groceries on Instacart. Crew AI seems like the best framework, yeah?
 John: Yeah, Crew AI’s built for multi-agent workflows, and I think it gives us a solid starting point. We don’t have to build everything from scratch.
@@ -69,6 +55,33 @@ Guilio: Agreed—if we’re sure it’s too much.
 Jessica: Alright, let’s research. Five-minute break, then regroup?
 """
 
-response = llm.complete(conversation)
+# 4) Initialize the genai client. Replace "YOUR_API_KEY" with your real key.
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-print(response)
+# 5) Generate the content with forced JSON extraction & validation.
+response = client.models.generate_content(
+    model="models/gemini-2.0-flash",
+    contents=conversation,      # The conversation or "user" message
+    config={
+        "response_mime_type": "application/json",
+        "system_instruction": system_prompt,
+        # Let genai parse the response into a list of InfoItem objects.
+        "response_schema": list[InfoItem],
+    }
+)
+
+# 6) Print the raw JSON text (already guaranteed to match your schema).
+if response.text:
+    print("Raw JSON output:\n", response.text)
+    try:
+        # Attempt to parse the JSON and create InfoItem objects
+        adapter = TypeAdapter(list[InfoItem])
+        info_items = adapter.validate_json(response.text)
+        print("\nParsed InfoItems:")
+        for item in info_items:
+            print(f"Topic: {item.topic}, Information Request: {item.Information_request}")
+
+    except Exception as e:
+        print(f"\nError parsing JSON: {e}")
+else:
+    print("No response text received.")
