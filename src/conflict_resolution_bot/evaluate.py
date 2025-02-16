@@ -5,6 +5,7 @@ import os
 # 1) Define a Pydantic model matching your desired JSON schema.
 class InfoItem(BaseModel):
     topic: str
+    context: str
     Information_request: str
 
 # 2) Create the system prompt telling the model exactly what to do.
@@ -19,6 +20,7 @@ The output:
   [
     {
       "topic": "some string",
+      "context": "some string"
       "Information_request": "some string"
     },
     ...
@@ -27,11 +29,12 @@ The output:
 
 For example, if they discussed “Crew AI,” a valid object might be:
 {
-  "topic": "Crew AI",
-  "Information_request": "Is Crew AI the best framework?"
+  "topic": "Cookies",
+  "context": "We're exploring cookie recipes"
+  "Information_request": "Which type of flour is best for baking cookies?"
 }
 
-Return ONLY the JSON array, nothing else. Make sure all the context required is included in the information request so that information can be found standalone.
+Return ONLY the JSON array, nothing else. 
 """
 
 # 3) Example conversation that you'll pass in as "contents".
@@ -67,21 +70,9 @@ response = client.models.generate_content(
         "system_instruction": system_prompt,
         # Let genai parse the response into a list of InfoItem objects.
         "response_schema": list[InfoItem],
+        "temperature": 0
     }
 )
 
 # 6) Print the raw JSON text (already guaranteed to match your schema).
-if response.text:
-    print("Raw JSON output:\n", response.text)
-    try:
-        # Attempt to parse the JSON and create InfoItem objects
-        adapter = TypeAdapter(list[InfoItem])
-        info_items = adapter.validate_json(response.text)
-        print("\nParsed InfoItems:")
-        for item in info_items:
-            print(f"Topic: {item.topic}, Information Request: {item.Information_request}")
-
-    except Exception as e:
-        print(f"\nError parsing JSON: {e}")
-else:
-    print("No response text received.")
+print(response.text)
