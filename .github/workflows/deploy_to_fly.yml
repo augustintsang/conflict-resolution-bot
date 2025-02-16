@@ -16,7 +16,7 @@ jobs:
       - name: Debug Fly.io Authentication
         run: echo "FLY_API_KEY is set"
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_KEY }}
+          FLY_API_KEY: ${{ secrets.FLY_API_KEY }}
 
       - name: Install Fly.io CLI
         run: curl -L https://fly.io/install.sh | sh
