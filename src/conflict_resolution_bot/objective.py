@@ -3,10 +3,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-import os
 import json
 import uvicorn
-from google import genai
+from litellm import completion
 
 #
 # OBJECTIVE MODELS
@@ -31,9 +30,8 @@ def generate_objective(input_data: ObjectiveInput):
           "Objective": "some string"
         }
       ]
-    It takes a conversation string as input, then uses Gemini to parse out the conversation's objective(s).
+    It takes a conversation string as input, then uses the Sambanova model to extract the conversation's objective(s).
     """
-
     system_prompt = """
     You are reviewing a conversation among multiple participants.
 
@@ -58,24 +56,28 @@ def generate_objective(input_data: ObjectiveInput):
 
     conversation = input_data.conversation
 
-    # Initialize the genai client
-    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    # Prepare messages with a system prompt and the user-provided conversation.
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": conversation}
+    ]
 
-    # Generate the content with forced JSON extraction & validation.
-    response = client.models.generate_content(
-        model="models/gemini-2.0-flash",
-        contents=conversation,
-        config={
-            "response_mime_type": "application/json",
-            "system_instruction": system_prompt,
-            # IMPORTANT: Use the built-in `list` syntax:
-            "response_schema": list[ObjectiveOutput],
-            "temperature": 0
-        }
+    # Use litellm's completion to generate the objective using the Sambanova model.
+    response = completion(
+        model="sambanova/Meta-Llama-3.1-8B-Instruct",
+        messages=messages,
+        response_format={"type": "json_object"}
     )
 
-    # Convert the raw JSON string to a Python list/dict
-    return json.loads(response.text)
+    # Extract the generated text from the first choice.
+    try:
+        content = response["choices"][0]["message"]["content"]
+        # Parse the JSON output from the generated text.
+        objectives = json.loads(content)
+    except Exception as e:
+        raise ValueError("Failed to parse model output as a valid JSON array.") from e
+
+    return objectives
 
 #
 # IMPORTANT: Import `evaluate` here so that /evaluate_conversation is also attached
