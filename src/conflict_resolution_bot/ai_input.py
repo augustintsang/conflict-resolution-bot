@@ -47,6 +47,7 @@ def generate_ai_input_logic(input_data: AIInput) -> List[dict]:
 
     The output:
     - MUST be valid JSON conforming to the schema below:
+    - Must be natural, provide feedback that is helpful to the conversation and relatively concise.
       [
         {
           "AI_Input": "some string"
