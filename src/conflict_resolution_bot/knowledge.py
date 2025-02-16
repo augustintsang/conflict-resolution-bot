@@ -1,4 +1,3 @@
-# knowledge.py
 import json
 import re
 from typing import List
@@ -28,6 +27,7 @@ class BatchedKnowledgeOutput(BaseModel):
 # Endpoint
 #
 @app.post("/knowledge", response_model=List[BatchedKnowledgeOutput])
+@weave.op()
 def knowledge_endpoint(input_data: KnowledgeInput):
     """
     Accepts multiple questions, uses Perplexity model to answer each question.

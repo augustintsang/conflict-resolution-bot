@@ -1,5 +1,3 @@
-# evaluate.py
-
 import os
 import json
 from typing import List
@@ -67,4 +65,5 @@ def evaluate_conversation_logic(input_data: EvaluateInput) -> List[dict]:
         }
     )
 
+    # The response should already be valid JSON; parse it
     return json.loads(response.text)

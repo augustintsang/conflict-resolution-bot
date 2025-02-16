@@ -1,17 +1,18 @@
-# main.py
-
 from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
 import weave
 
-# Import the existing app
+# Import the existing shared FastAPI instance
 from app import app
 
-# Import the logic-only functions (no circular import, because these don't import `app`)
+# Import the logic-only functions
 from objective import generate_objective_logic, ObjectiveInput
 from evaluate import evaluate_conversation_logic, EvaluateInput
 from knowledge import knowledge_logic, KnowledgeInput
+
+# Import the new WebSocket router
+from streaming import router as streaming_router
 
 #
 # Combined Data Models
@@ -24,6 +25,7 @@ class CombinedOutput(BaseModel):
     Evaluate: list
     knowledge: list
 
+# Initialize Weave tracking as before
 weave.init('hackathon-example')
 
 #
@@ -60,8 +62,8 @@ def combined_insights(input_data: CombinedInput):
         if "Information_request" in eval_item:
             questions_list.append(eval_item["Information_request"])
 
-    # If we have no questions, knowledge_logic would return empty
-    knowledge_data = knowledge_logic(KnowledgeInput(questions=questions_list))
+    knowledge_data = knowledge_logic(KnowledgeInput(questions=questions_list)) \
+        if questions_list else []
 
     return {
         "Objective": objective_data,
@@ -69,6 +71,9 @@ def combined_insights(input_data: CombinedInput):
         "knowledge": knowledge_data
     }
 
+
+# Include the new WebSocket router for streaming
+app.include_router(streaming_router)
 
 # If you run this file directly:
 if __name__ == "__main__":
