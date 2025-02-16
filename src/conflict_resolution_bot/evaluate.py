@@ -5,6 +5,7 @@ import json
 from typing import List
 from pydantic import BaseModel
 from google import genai
+import weave
 
 from app import app  # shared FastAPI instance
 
@@ -23,6 +24,7 @@ class EvaluateOutput(BaseModel):
 # Endpoint & Logic
 #
 @app.post("/evaluate_conversation", response_model=List[EvaluateOutput])
+@weave.op()
 def evaluate_conversation_endpoint(input_data: EvaluateInput):
     """
     This endpoint returns a JSON array of:

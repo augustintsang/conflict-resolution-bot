@@ -4,6 +4,7 @@ import json
 from typing import List
 from pydantic import BaseModel
 from litellm import completion
+import weave
 
 from app import app  # Import the shared app (no circular import)
 # (Don't import evaluate.py or knowledge.py here to avoid circular import)
@@ -21,6 +22,7 @@ class ObjectiveOutput(BaseModel):
 # Endpoint & Logic
 #
 @app.post("/generate_objective", response_model=List[ObjectiveOutput])
+@weave.op()
 def generate_objective_endpoint(input_data: ObjectiveInput):
     """
     This endpoint returns a JSON array:

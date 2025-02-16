@@ -4,6 +4,7 @@ import re
 from typing import List
 from pydantic import BaseModel
 from litellm import completion
+import weave
 
 from app import app
 

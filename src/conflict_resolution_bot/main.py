@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from typing import List
 from pydantic import BaseModel
+import weave
 
 # Import the existing app
 from app import app
@@ -22,6 +23,8 @@ class CombinedOutput(BaseModel):
     Objective: list
     Evaluate: list
     knowledge: list
+
+weave.init('hackathon-example')
 
 #
 # Combined Endpoint
