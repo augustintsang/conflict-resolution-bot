@@ -4,24 +4,19 @@ import os
 
 # 1) Define a Pydantic model matching your desired JSON schema.
 class InfoItem(BaseModel):
-    topic: str
-    context: str
-    Information_request: str
+    Objective: str
 
 # 2) Create the system prompt telling the model exactly what to do.
 system_prompt = """
 You are reviewing a conversation among multiple participants.
 
-Your goal is to produce a JSON array containing each piece of information 
-the team needs to look up or clarify to resolve the conversation. 
+Your goal is to produce a JSON array containing the objective of the conversation.
 
 The output:
 - MUST be valid JSON conforming to the schema below:
   [
     {
-      "topic": "some string",
-      "context": "some string"
-      "Information_request": "some string"
+      "Objective": "some string"
     },
     ...
   ]
@@ -29,9 +24,7 @@ The output:
 
 For example, if they discussed “Crew AI,” a valid object might be:
 {
-  "topic": "Cookies",
-  "context": "We're exploring cookie recipes"
-  "Information_request": "Which type of flour is best for baking cookies?"
+  "Objective": "Create a cookie recipe"
 }
 
 Return ONLY the JSON array, nothing else. 
